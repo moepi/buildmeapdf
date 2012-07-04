@@ -9,7 +9,6 @@ URL=$1
 #https://piratenpad.de/$ID
 #https://piratenpad.de/ep/pad/export/$ID/latest?format=txt
 #
-URL="https://piratenpad.de/DhJoaBLhhM"
 PADEXP="`echo $URL | sed 's/.*piratenpad.de\/\(.*\).*/https:\/\/piratenpad.de\/ep\/pad\/export\/\1\/latest?format=txt/'`"
 #
 
