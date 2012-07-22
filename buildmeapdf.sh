@@ -1,37 +1,36 @@
 #!/bin/bash
-WGETBIN="`which wget`"
-PDFLATEXBIN="`which pdflatex`"
-PDFVIEWER="`which zathura`"
+WGETBIN="$(which wget)"
+PDFLATEXBIN="$(which pdflatex)"
 
 function usage {
 cat << EOF
-usage: `basename $0` name url
+usage: $(basename $0) url [name]
 This is a stupid little bash script getting tex-source from an etherpads/etherpad-lites and building a pdf.
 EOF
 exit 1
 }
-[[ $# -eq 2 ]] && JOBNAME=$1 && URL=$2 || usage
+if [[ $# -eq 1 ]]; then
+	URL=$1
+elif [[ $# -eq 2 ]]; then
+	URL=$1
+	PDFNAME=$2
+else
+	usage
+fi
 
-# for now we just sed over the URL multiple times
-# the one that matches wins
-# etherpad URL layout
-# https://piratenpad.de/ID
-# to
-# https://piratenpad.de/ep/pad/export/ID/latest?format=txt
-#
-# expressions for this one is ugly - has anyone a better idea?
-#
+# 
 # etherpad lite URL layout
-# http://beta.etherpad.org/p/ID
+# http://beta.etherpad.org/$someletter/ID
 # to
-# http://beta.etherpad.org/p/ID/export/txt
+# http://beta.etherpad.org/$someletter/ID/export/txt
 #
 
-PADEXP="`echo $URL | sed 's/.*piratenpad.de\/\(.*\).*/https:\/\/piratenpad.de\/ep\/pad\/export\/\1\/latest?format=txt/'`"
-PADEXP="`echo $PADEXP | sed 's/.*piratepad.net\/\(.*\).*/https:\/\/piratepad.net\/ep\/pad\/export\/\1\/latest?format=txt/'`"
-PADEXP="`echo $PADEXP | sed 's/.*titanpad.com\/\(.*\).*/https:\/\/titanpad.com\/ep\/pad\/export\/\1\/latest?format=txt/'`"
-PADEXP="`echo $PADEXP | sed 's/\(http.*\/r\/[a-Z0-9]*$\)/\1\/export\/txt/'`"
-
+PADEXP="$(echo $URL | sed 's/\(http.*\/\(r\|\p\)\/[a-Z0-9]*$\)/\1\/export\/txt/')"
+#PADEXP="$(echo $URL | sed 's/.*piratenpad.de\/\(.*\).*/https:\/\/piratenpad.de\/ep\/pad\/export\/\1\/latest?format=txt/')"
+#PADEXP="$(echo $PADEXP | sed 's/.*piratepad.net\/\(.*\).*/https:\/\/piratepad.net\/ep\/pad\/export\/\1\/latest?format=txt/')"
+#PADEXP="$(echo $PADEXP | sed 's/.*titanpad.com\/\(.*\).*/https:\/\/titanpad.com\/ep\/pad\/export\/\1\/latest?format=txt/')"
 [[ -z $PADEXP ]] && exit 2
-echo "processing"
-$WGETBIN -qO- $PADEXP | $PDFLATEXBIN --jobname $JOBNAME 1>/dev/null && rm $JOBNAME.{aux,log} && echo "pdf compiled" && $PDFVIEWER $JOBNAME.pdf
+
+echo "processing $PDFNAME"
+[[ -n $PDFNAME ]] && JOBNAME="--jobname $PDFNAME" || PDFNAME="texput"
+$WGETBIN -qO- $PADEXP | $PDFLATEXBIN $JOBNAME && rm $PDFNAME.{aux,log} && echo "pdf compiled"
