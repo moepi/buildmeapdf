@@ -1,4 +1,4 @@
-This is a stupid little bash script getting tex-source from an etherpad/piratenpad and building a pdf.
+This is a stupid little bash script getting tex-source from an etherpad lite and building a pdf.
 Copyright (C) 2012 Martin Dahse
 
 This program is free software: you can redistribute it and/or modify
